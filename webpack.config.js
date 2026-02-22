@@ -18,8 +18,10 @@ const localI18nIndex = path.resolve(__dirname, '../../libs/i18n/src/index.ts');
 
 const hasLocalUiKitFallback = fs.existsSync(localUiKitIndex) && fs.existsSync(localUiKitCssDir);
 const hasLocalI18nFallback = fs.existsSync(localI18nIndex);
-const hasLiveUiKit = hasResolvablePackage('@mfe-sols/ui-kit/package.json');
-const hasLiveI18n = hasResolvablePackage('@mfe-sols/i18n/package.json');
+// Check the actual runtime import specifiers instead of package.json subpaths.
+// Some packages do not export "./package.json", which would cause false negatives on Vercel.
+const hasLiveUiKit = hasResolvablePackage('@mfe-sols/ui-kit');
+const hasLiveI18n = hasResolvablePackage('@mfe-sols/i18n');
 const isStrictLiveMode =
   process.env.VERCEL === '1' ||
   process.env.CI === 'true' ||
@@ -35,8 +37,8 @@ if ((!hasLiveUiKit || !hasLiveI18n) && isStrictLiveMode) {
       `Missing live package dependency: ${missing.join(', ')}`,
       'This build is running in strict live-package mode (CI/Vercel).',
       'Configure GitHub Packages auth and install dependencies before build:',
-      '1) set NODE_AUTH_TOKEN',
-      '2) pnpm -C mfe-orchestra/apps/mfe-playground-vanilla install'
+      '1) set NODE_AUTH_TOKEN (Vercel Environment Variable)',
+      '2) run install in the app root (vercel.json installCommand or local npm/pnpm install)'
     ].join('\n')
   );
 }
