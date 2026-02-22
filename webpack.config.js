@@ -3,12 +3,14 @@ const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-const hasResolvablePackage = (specifier) => {
-  try {
-    require.resolve(specifier, { paths: [__dirname] });
-    return true;
-  } catch {
-    return false;
+const findInstalledPackageDir = (packageName, startDir) => {
+  let currentDir = startDir;
+  while (true) {
+    const candidate = path.join(currentDir, 'node_modules', ...packageName.split('/'));
+    if (fs.existsSync(candidate)) return candidate;
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) return null;
+    currentDir = parentDir;
   }
 };
 
@@ -18,10 +20,10 @@ const localI18nIndex = path.resolve(__dirname, '../../libs/i18n/src/index.ts');
 
 const hasLocalUiKitFallback = fs.existsSync(localUiKitIndex) && fs.existsSync(localUiKitCssDir);
 const hasLocalI18nFallback = fs.existsSync(localI18nIndex);
-// Check the actual runtime import specifiers instead of package.json subpaths.
-// Some packages do not export "./package.json", which would cause false negatives on Vercel.
-const hasLiveUiKit = hasResolvablePackage('@mfe-sols/ui-kit');
-const hasLiveI18n = hasResolvablePackage('@mfe-sols/i18n');
+const liveUiKitDir = findInstalledPackageDir('@mfe-sols/ui-kit', __dirname);
+const liveI18nDir = findInstalledPackageDir('@mfe-sols/i18n', __dirname);
+const hasLiveUiKit = Boolean(liveUiKitDir);
+const hasLiveI18n = Boolean(liveI18nDir);
 const isStrictLiveMode =
   process.env.VERCEL === '1' ||
   process.env.CI === 'true' ||
