@@ -1,0 +1,22 @@
+{
+  "name": "playground-vanilla",
+  "projectType": "application",
+  "root": "apps/playground-vanilla",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/playground-vanilla",
+        "command": "pnpm start"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/playground-vanilla",
+        "command": "pnpm build"
+      },
+      "outputs": ["{workspaceRoot}/apps/playground-vanilla/dist"]
+    }
+  }
+}
